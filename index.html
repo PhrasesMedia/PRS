@@ -904,6 +904,7 @@
         function saveAssessment() {
             console.log('Save button clicked');
             console.log('Selected traits:', selectedTraits);
+            console.log('Editing mode:', editingAssessmentId ? 'Yes, ID: ' + editingAssessmentId : 'No');
 
             if (selectedTraits.size === 0) {
                 alert('Please select at least one trait before saving.');
@@ -918,19 +919,44 @@
                 return;
             }
 
-            const assessment = {
-                id: Date.now(),
-                name: name,
-                period: period,
-                notes: document.getElementById('generalNotes').value,
-                date: new Date().toLocaleDateString(),
-                traits: {
-                    l1: [],
-                    l2: [],
-                    l3: [],
-                    l4: []
+            let assessment;
+
+            if (editingAssessmentId) {
+                // Update existing assessment
+                assessment = assessments.find(a => a.id === editingAssessmentId);
+                if (!assessment) {
+                    alert('Assessment not found. Creating new one instead.');
+                    editingAssessmentId = null;
+                } else {
+                    // Update fields
+                    assessment.name = name;
+                    assessment.period = period;
+                    assessment.notes = document.getElementById('generalNotes').value;
+                    assessment.traits = {
+                        l1: [],
+                        l2: [],
+                        l3: [],
+                        l4: []
+                    };
                 }
-            };
+            }
+
+            if (!editingAssessmentId) {
+                // Create new assessment
+                assessment = {
+                    id: Date.now(),
+                    name: name,
+                    period: period,
+                    notes: document.getElementById('generalNotes').value,
+                    date: new Date().toLocaleDateString(),
+                    traits: {
+                        l1: [],
+                        l2: [],
+                        l3: [],
+                        l4: []
+                    }
+                };
+            }
 
             console.log('Assessment object created:', assessment);
 
@@ -954,11 +980,13 @@
 
             // Load current assessments from localStorage
             loadAssessments();
-            console.log('Current assessments before push:', assessments);
+            console.log('Current assessments before save:', assessments);
             
-            // Add new assessment
-            assessments.push(assessment);
-            console.log('All assessments after push:', assessments);
+            // Add new assessment if not editing
+            if (!editingAssessmentId) {
+                assessments.push(assessment);
+            }
+            console.log('All assessments after save:', assessments);
             
             try {
                 localStorage.setItem('assessments', JSON.stringify(assessments));
@@ -996,8 +1024,13 @@
             renderAssessments();
             console.log('Render complete');
 
-            // Success message
-            alert('Assessment saved successfully!');
+            // Reset editing mode
+            if (editingAssessmentId) {
+                alert('Assessment updated successfully!');
+                cancelEdit();
+            } else {
+                alert('Assessment saved successfully!');
+            }
         }
 
         function resetForm() {
@@ -1052,6 +1085,7 @@
                 const overallRating = calculateOverallRating(assessment);
                 const ratingColor = getRatingColor(overallRating);
                 const ratingLabel = getRatingLabel(overallRating);
+                const hasL4 = assessment.traits.l4.length > 0;
 
                 return `
                     <div class="employee-card">
@@ -1086,6 +1120,8 @@
 
                         <div class="action-buttons">
                             <button class="action-btn view-btn" onclick="viewDetails(${assessment.id})">View Full Assessment</button>
+                            <button class="action-btn view-btn" onclick="editAssessment(${assessment.id})" style="background: #f59e0b;">Edit</button>
+                            ${hasL4 ? `<button class="action-btn view-btn" onclick="generatePIP(${assessment.id})" style="background: #dc2626;">Open PIP</button>` : ''}
                             <button class="action-btn delete-btn" onclick="deleteAssessment(${assessment.id})">Delete</button>
                         </div>
                     </div>
@@ -1170,6 +1206,233 @@
                 assessments = assessments.filter(a => a.id !== id);
                 localStorage.setItem('assessments', JSON.stringify(assessments));
                 renderAssessments();
+            }
+        }
+
+        let editingAssessmentId = null; // Track which assessment is being edited
+
+        function editAssessment(id) {
+            const assessment = assessments.find(a => a.id === id);
+            if (!assessment) return;
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Set editing mode
+            editingAssessmentId = id;
+
+            // Populate form fields
+            document.getElementById('employeeName').value = assessment.name;
+            document.getElementById('reviewPeriod').value = assessment.period;
+            document.getElementById('generalNotes').value = assessment.notes || '';
+
+            // Clear current selections
+            selectedTraits.clear();
+            traitNotes = {};
+            document.querySelectorAll('.trait-checkbox').forEach(el => {
+                el.classList.remove('selected', 'hidden');
+                const checkbox = el.querySelector('input[type="checkbox"]');
+                if (checkbox) checkbox.checked = false;
+                const noteField = el.querySelector('.trait-note');
+                if (noteField) {
+                    noteField.style.display = 'none';
+                    noteField.value = '';
+                }
+            });
+
+            // Select saved traits and populate notes
+            ['l1', 'l2', 'l3', 'l4'].forEach(level => {
+                assessment.traits[level].forEach(trait => {
+                    selectedTraits.add(trait.id);
+                    
+                    // Check the checkbox
+                    const checkbox = document.querySelector(`input[value="${trait.id}"]`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                        checkbox.parentElement.classList.add('selected');
+                        
+                        // Show and populate note field
+                        const noteField = document.getElementById(`note_${trait.id}`);
+                        if (noteField) {
+                            noteField.style.display = 'block';
+                            noteField.value = trait.note || '';
+                            if (trait.note) {
+                                traitNotes[trait.id] = trait.note;
+                            }
+                        }
+                    }
+                });
+            });
+
+            // Update visibility
+            updateTraitVisibility();
+            updateSelectedCount();
+
+            // Change button text to indicate editing
+            const saveBtn = document.querySelector('.btn');
+            saveBtn.textContent = 'Update Assessment';
+            saveBtn.style.background = '#f59e0b';
+
+            // Show cancel button if not already present
+            let cancelBtn = document.getElementById('cancelEditBtn');
+            if (!cancelBtn) {
+                cancelBtn = document.createElement('button');
+                cancelBtn.id = 'cancelEditBtn';
+                cancelBtn.className = 'btn btn-secondary';
+                cancelBtn.textContent = 'Cancel Edit';
+                cancelBtn.onclick = cancelEdit;
+                saveBtn.parentElement.insertBefore(cancelBtn, saveBtn.nextSibling);
+            }
+        }
+
+        function cancelEdit() {
+            editingAssessmentId = null;
+            resetForm();
+            
+            // Reset button text
+            const saveBtn = document.querySelector('.btn');
+            saveBtn.textContent = 'Save Assessment';
+            saveBtn.style.background = '#667eea';
+            
+            // Remove cancel button
+            const cancelBtn = document.getElementById('cancelEditBtn');
+            if (cancelBtn) {
+                cancelBtn.remove();
+            }
+        }
+
+        function generatePIP(id) {
+            const assessment = assessments.find(a => a.id === id);
+            if (!assessment) return;
+
+            // Create PIP document
+            const today = new Date().toLocaleDateString();
+            const reviewDate = new Date();
+            reviewDate.setDate(reviewDate.getDate() + 30); // 30-day PIP
+            const reviewDateStr = reviewDate.toLocaleDateString();
+
+            let pipDocument = `PIP EXAMPLE - FOR REFERENCE ONLY
+(This is not a formal document - consult HR before issuing any PIP)
+
+================================================================================
+
+PERFORMANCE IMPROVEMENT PLAN (PIP)
+
+Employee Name: ${assessment.name}
+Review Period: ${assessment.period}
+Date Issued: ${today}
+Review Date: ${reviewDateStr}
+
+PERFORMANCE ISSUES IDENTIFIED:
+
+`;
+
+            // Add L4 issues
+            if (assessment.traits.l4.length > 0) {
+                pipDocument += `Critical Issues (Must Address Immediately):\n\n`;
+                assessment.traits.l4.forEach((trait, index) => {
+                    pipDocument += `${index + 1}. ${trait.name}\n`;
+                    pipDocument += `   Description: ${trait.desc}\n`;
+                    if (trait.note) {
+                        pipDocument += `   Evidence: ${trait.note}\n`;
+                    }
+                    pipDocument += `\n`;
+                });
+            }
+
+            // Add L3 issues if present
+            if (assessment.traits.l3.length > 0) {
+                pipDocument += `\nAdditional Areas Needing Improvement:\n\n`;
+                assessment.traits.l3.forEach((trait, index) => {
+                    pipDocument += `${index + 1}. ${trait.name}\n`;
+                    pipDocument += `   Description: ${trait.desc}\n`;
+                    if (trait.note) {
+                        pipDocument += `   Evidence: ${trait.note}\n`;
+                    }
+                    pipDocument += `\n`;
+                });
+            }
+
+            pipDocument += `
+EXPECTATIONS FOR IMPROVEMENT:
+
+The above performance issues must be addressed immediately. Failure to demonstrate significant improvement by ${reviewDateStr} may result in further disciplinary action, up to and including termination of employment.
+
+REQUIRED ACTIONS:
+
+1. Immediate cessation of all L4 behaviors listed above
+2. Demonstrate consistent professional behavior in the workplace
+3. Meet with supervisor weekly to discuss progress
+4. Complete any required training or coaching sessions
+
+SUPPORT PROVIDED:
+
+- Weekly check-ins with supervisor
+- Clear expectations and feedback
+- Resources and training as needed
+
+CONSEQUENCES OF NON-COMPLIANCE:
+
+Failure to meet the requirements of this Performance Improvement Plan may result in:
+- Further disciplinary action
+- Suspension
+- Termination of employment
+
+ACKNOWLEDGMENT:
+
+By signing below, the employee acknowledges receipt of this Performance Improvement Plan and understands the expectations outlined above.
+
+Employee Signature: _________________________ Date: _____________
+
+Manager Signature: _________________________ Date: _____________
+
+HR Representative: _________________________ Date: _____________
+`;
+
+            // Show in modal
+            document.getElementById('modalTitle').textContent = `PIP Example - ${assessment.name}`;
+            document.getElementById('modalBody').innerHTML = `
+                <div style="background: #fef2f2; padding: 20px; border-radius: 10px; border: 2px solid #dc2626; margin-bottom: 20px;">
+                    <h4 style="color: #dc2626; margin-bottom: 10px;">⚠️ IMPORTANT - FOR REFERENCE ONLY</h4>
+                    <p style="color: #666; font-weight: 600;">This is an example PIP for documentation and reference purposes only. DO NOT use this as a formal Performance Improvement Plan without proper HR review and approval. Always consult with your HR department before issuing any formal PIP to ensure compliance with company policy and legal requirements.</p>
+                </div>
+                <div style="background: white; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px;">
+                    <pre style="white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 0.9em; line-height: 1.6;">${pipDocument}</pre>
+                </div>
+                <div style="margin-top: 20px; display: flex; gap: 10px;">
+                    <button onclick="copyPIP()" class="action-btn view-btn" style="flex: 1;">Copy to Clipboard</button>
+                    <button onclick="downloadPIP('${assessment.name}')" class="action-btn view-btn" style="flex: 1; background: #059669;">Download as Text</button>
+                </div>
+            `;
+            
+            // Store PIP in temporary variable for copying
+            window.currentPIP = pipDocument;
+            
+            document.getElementById('detailModal').classList.add('active');
+        }
+
+        function copyPIP() {
+            if (window.currentPIP) {
+                navigator.clipboard.writeText(window.currentPIP).then(() => {
+                    alert('PIP copied to clipboard!');
+                }).catch(err => {
+                    console.error('Failed to copy:', err);
+                    alert('Failed to copy. Please try selecting and copying manually.');
+                });
+            }
+        }
+
+        function downloadPIP(employeeName) {
+            if (window.currentPIP) {
+                const blob = new Blob([window.currentPIP], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `PIP_${employeeName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
             }
         }
 
