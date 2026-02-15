@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Rating Scale</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .info-banner {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .info-banner strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        /* Trait Selection */
+        .trait-section {
+            margin-bottom: 25px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            background: #f9fafb;
+        }
+
+        .trait-section.l1 {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .trait-section.l2 {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .trait-section.l3 {
+            border-color: #f59e0b;
+            background: #fffbeb;
+        }
+
+        .trait-section.l4 {
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .trait-section h3 {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .trait-section.l1 h3 {
+            color: #059669;
+        }
+
+        .trait-section.l2 h3 {
+            color: #2563eb;
+        }
+
+        .trait-section.l3 h3 {
+            color: #d97706;
+        }
+
+        .trait-section.l4 h3 {
+            color: #dc2626;
+        }
+
+        .trait-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 10px;
+        }
+
+        .trait-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            opacity: 1;
+        }
+
+        .trait-checkbox:hover:not(.disabled) {
+            transform: translateX(5px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .trait-checkbox.disabled {
+            opacity: 0.3;
+            pointer-events: none;
+            background: #f3f4f6;
+        }
+
+        .trait-checkbox.hidden {
+            display: none;
+        }
+
+        .trait-checkbox.selected {
+            background: #e0f2fe;
+            border: 2px solid #3b82f6;
+        }
+
+        .trait-note {
+            width: 100%;
+            margin-top: 8px;
+            padding: 8px;
+            border: 2px solid #3b82f6;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .trait-note:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .trait-checkbox input[type="checkbox"] {
+            margin-top: 3px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .trait-label {
+            flex: 1;
+        }
+
+        .trait-label strong {
+            display: block;
+            margin-bottom: 3px;
+            font-size: 0.95em;
+        }
+
+        .trait-label p {
+            color: #666;
+            font-size: 0.85em;
+            margin: 0;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .selected-count {
+            background: #667eea;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* Employee List */
+        .employee-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .employee-card {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border-left: 5px solid #667eea;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .employee-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .employee-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .employee-name {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .employee-period {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .overall-rating {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 1em;
+            color: white;
+            margin-top: 10px;
+        }
+
+        .trait-summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .summary-badge {
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .summary-badge.l1 {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .summary-badge.l2 {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .summary-badge.l3 {
+            background: #fed7aa;
+            color: #d97706;
+        }
+
+        .summary-badge.l4 {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .summary-number {
+            font-size: 1.5em;
+            display: block;
+        }
+
+        .summary-label {
+            font-size: 0.8em;
+            display: block;
+            margin-top: 3px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .view-btn {
+            background: #667eea;
+            color: white;
+            flex: 1;
+        }
+
+        .view-btn:hover {
+            background: #5568d3;
+        }
+
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #dc2626;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 40px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .modal-close {
+            background: #ef4444;
+            color: white;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            font-size: 1.3em;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .modal-close:hover {
+            background: #dc2626;
+        }
+
+        .trait-list {
+            margin-bottom: 20px;
+        }
+
+        .trait-list h4 {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .trait-list.l1 h4 {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .trait-list.l2 h4 {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .trait-list.l3 h4 {
+            background: #fed7aa;
+            color: #d97706;
+        }
+
+        .trait-list.l4 h4 {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .trait-item {
+            padding: 8px 15px;
+            margin-bottom: 5px;
+            background: #f9fafb;
+            border-radius: 6px;
+            font-size: 0.95em;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .overall-assessment {
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .overall-assessment h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .performance-bar {
+            display: flex;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .bar-segment {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.85em;
+            transition: all 0.3s;
+        }
+
+        .bar-segment:hover {
+            opacity: 0.8;
+        }
+
+        .bar-segment.l1 {
+            background: #10b981;
+        }
+
+        .bar-segment.l2 {
+            background: #3b82f6;
+        }
+
+        .bar-segment.l3 {
+            background: #f59e0b;
+        }
+
+        .bar-segment.l4 {
+            background: #ef4444;
+        }
+
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .trait-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .trait-summary {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Performance Rating Scale</h1>
+            <p>Professional performance documentation and assessment tool</p>
+        </div>
+
+        <div class="info-banner">
+            <strong>How it works:</strong>
+            When you select a trait, conflicting traits automatically hide. For example, selecting "Exceeds Targets" will hide "Meets Targets" and "Misses Targets". Add notes to document specific examples.
+        </div>
+
+        <div class="main-layout">
+            <div class="card">
+                <h2>New Assessment</h2>
+                <div id="assessmentForm">
+                    <div class="form-group">
+                        <label for="employeeName">Employee Name</label>
+                        <input type="text" id="employeeName" required placeholder="Enter employee name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reviewPeriod">Review Period</label>
+                        <input type="text" id="reviewPeriod" required placeholder="e.g., Q1 2024, Jan 2024">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="generalNotes">General Notes (Optional)</label>
+                        <textarea id="generalNotes" placeholder="Overall observations..."></textarea>
+                    </div>
+
+                    <div class="selected-count" id="selectedCount">0 traits selected</div>
+
+                    <div class="trait-section l1">
+                        <h3>L1 - Exceptional Performance</h3>
+                        <div class="trait-grid" id="l1Traits"></div>
+                    </div>
+
+                    <div class="trait-section l2">
+                        <h3>L2 - Meets Requirements</h3>
+                        <div class="trait-grid" id="l2Traits"></div>
+                    </div>
+
+                    <div class="trait-section l3">
+                        <h3>L3 - Needs Improvement</h3>
+                        <div class="trait-grid" id="l3Traits"></div>
+                    </div>
+
+                    <div class="trait-section l4">
+                        <h3>L4 - Must Address Immediately</h3>
+                        <div class="trait-grid" id="l4Traits"></div>
+                    </div>
+
+                    <button type="button" class="btn" onclick="saveAssessment()">Save Assessment</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">Clear Form</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Employee Assessments</h2>
+                <div class="employee-list" id="employeeList">
+                    <div class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                        </svg>
+                        <p>No assessments yet. Create your first assessment!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div class="modal" id="detailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle"></h2>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        // Define traits with conflict groups
+        const traits = {
+            l1: [
+                { id: 'l1_1', name: 'Takes Initiative', desc: 'Identifies and solves problems before they escalate', conflicts: ['targets', 'quality', 'deadlines'] },
+                { id: 'l1_2', name: 'Mentors Others', desc: 'Voluntarily coaches junior team members and new hires', conflicts: ['teamwork'] },
+                { id: 'l1_3', name: 'Innovates Processes', desc: 'Creates improvements that increase efficiency or revenue', conflicts: ['learning'] },
+                { id: 'l1_4', name: 'Supports Team', desc: 'Helps colleagues meet deadlines and achieve their goals', conflicts: ['teamwork'] },
+                { id: 'l1_5', name: 'Exceeds Targets', desc: 'Consistently surpasses performance goals and KPIs', conflicts: ['targets'] },
+                { id: 'l1_6', name: 'Leads Projects', desc: 'Takes ownership of cross-functional initiatives', conflicts: ['initiative'] },
+                { id: 'l1_7', name: 'Automates Tasks', desc: 'Streamlines repetitive work to save team time', conflicts: ['efficiency'] },
+                { id: 'l1_8', name: 'Continuous Learning', desc: 'Acquires new skills and certifications to add value', conflicts: ['learning'] },
+                { id: 'l1_9', name: 'Quality Excellence', desc: 'Delivers ahead of schedule with exceptional quality', conflicts: ['quality', 'deadlines'] },
+                { id: 'l1_10', name: 'Tackles Challenges', desc: 'Takes ownership of difficult assignments others avoid', conflicts: ['initiative'] },
+                { id: 'l1_11', name: 'Customer Champion', desc: 'Receives consistent positive feedback from clients', conflicts: ['customer'] },
+                { id: 'l1_12', name: 'Company Ambassador', desc: 'Represents the company at industry events', conflicts: ['representation'] }
+            ],
+            l2: [
+                { id: 'l2_1', name: 'Completes Tasks', desc: 'Finishes assigned work on time and to standard', conflicts: ['deadlines'] },
+                { id: 'l2_2', name: 'Meets Targets', desc: 'Achieves performance goals and KPIs consistently', conflicts: ['targets'] },
+                { id: 'l2_3', name: 'Follows Processes', desc: 'Adheres to established procedures correctly', conflicts: ['process'] },
+                { id: 'l2_4', name: 'Quality Work', desc: 'Delivers work that meets expectations', conflicts: ['quality'] },
+                { id: 'l2_5', name: 'Punctual & Present', desc: 'Shows up on time with good attendance', conflicts: ['attendance'] },
+                { id: 'l2_6', name: 'Communicates Well', desc: 'Responds promptly and clearly to messages', conflicts: ['communication'] },
+                { id: 'l2_7', name: 'Team Player', desc: 'Works collaboratively with colleagues', conflicts: ['teamwork'] },
+                { id: 'l2_8', name: 'Follows Through', desc: 'Keeps commitments and completes what they start', conflicts: ['followthrough'] },
+                { id: 'l2_9', name: 'Professional', desc: 'Maintains appropriate behavior and demeanor', conflicts: ['professionalism'] },
+                { id: 'l2_10', name: 'Job Knowledge', desc: 'Has required skills and understands responsibilities', conflicts: ['skills'] },
+                { id: 'l2_11', name: 'Accepts Feedback', desc: 'Implements suggestions and learns from corrections', conflicts: ['feedback'] },
+                { id: 'l2_12', name: 'Accountable', desc: 'Takes responsibility and admits mistakes', conflicts: ['accountability'] }
+            ],
+            l3: [
+                { id: 'l3_1', name: 'Misses Deadlines', desc: 'Frequently submits work late or needs extensions', conflicts: ['deadlines'] },
+                { id: 'l3_2', name: 'Below Standard Quality', desc: "Work is inconsistent or doesn't meet expectations", conflicts: ['quality'] },
+                { id: 'l3_3', name: 'Misses Targets', desc: 'Struggles to meet performance goals or KPIs', conflicts: ['targets'] },
+                { id: 'l3_4', name: 'Repeated Mistakes', desc: 'Makes same errors even after correction', conflicts: ['learning', 'quality'] },
+                { id: 'l3_5', name: 'Attendance Issues', desc: 'Frequent tardiness or unexplained absences', conflicts: ['attendance'] },
+                { id: 'l3_6', name: "Doesn't Follow Through", desc: 'Fails to complete commitments consistently', conflicts: ['followthrough'] },
+                { id: 'l3_7', name: 'Poor Communication', desc: "Slow to respond or doesn't provide updates", conflicts: ['communication'] },
+                { id: 'l3_8', name: "Doesn't Ask for Help", desc: 'Fails to seek assistance when struggling', conflicts: ['teamwork'] },
+                { id: 'l3_9', name: 'Skill Gaps', desc: 'Lacks required skills for aspects of role', conflicts: ['skills'] },
+                { id: 'l3_10', name: 'Resists Learning', desc: 'Unwilling to learn new processes or tools', conflicts: ['learning', 'feedback'] },
+                { id: 'l3_11', name: 'Defensive', desc: "Resistant to feedback or doesn't take ownership", conflicts: ['feedback', 'accountability'] },
+                { id: 'l3_12', name: 'Needs Supervision', desc: 'Requires excessive oversight to stay on track', conflicts: ['initiative'] }
+            ],
+            l4: [
+                { id: 'l4_1', name: 'Lying', desc: 'Dishonesty, falsifying records, or providing false information', conflicts: ['accountability'] },
+                { id: 'l4_2', name: 'Sleeping on the Job', desc: 'Falling asleep during work hours or unproductive behavior', conflicts: [] },
+                { id: 'l4_3', name: 'YouTube Usage', desc: 'Excessive personal video streaming during work time', conflicts: [] },
+                { id: 'l4_4', name: 'Phone Usage', desc: 'Excessive personal phone use affecting productivity', conflicts: [] },
+                { id: 'l4_5', name: 'Theft', desc: 'Stealing company property, supplies, or time', conflicts: ['accountability'] },
+                { id: 'l4_6', name: 'Harassment', desc: 'Inappropriate behavior toward colleagues or customers', conflicts: ['teamwork'] },
+                { id: 'l4_7', name: 'Insubordination', desc: 'Refusing direct orders or disrespecting management', conflicts: [] },
+                { id: 'l4_8', name: 'Chronic Tardiness/Absenteeism', desc: 'Repeatedly late or absent without valid excuse', conflicts: ['attendance'] },
+                { id: 'l4_9', name: 'Intoxication', desc: 'Being under the influence of drugs or alcohol at work', conflicts: [] },
+                { id: 'l4_10', name: 'Safety Violations', desc: 'Violating safety protocols, endangering self or others', conflicts: ['process'] },
+                { id: 'l4_11', name: 'Data Breaches', desc: 'Mishandling confidential or sensitive information', conflicts: ['process'] },
+                { id: 'l4_12', name: 'Time Fraud', desc: 'Clocking in for others or falsifying timesheets', conflicts: ['accountability'] },
+                { id: 'l4_13', name: 'Gross Negligence', desc: 'Severe carelessness causing damage or loss', conflicts: ['quality'] },
+                { id: 'l4_14', name: 'Fighting/Violence', desc: 'Physical altercations or threats at work', conflicts: ['teamwork'] },
+                { id: 'l4_15', name: 'Engages in Toxicity', desc: 'Creating a toxic work environment, spreading rumors, gossip, bullying, or undermining team morale', conflicts: ['teamwork', 'communication'] }
+            ]
+        };
+
+        let assessments = [];
+        let selectedTraits = new Set();
+        let traitNotes = {}; // Store notes for each trait
+
+        // Update trait note
+        function updateTraitNote(traitId, note) {
+            traitNotes[traitId] = note;
+        }
+
+        // Calculate overall performance rating
+        function calculateOverallRating(assessment) {
+            const counts = {
+                l1: assessment.traits.l1.length,
+                l2: assessment.traits.l2.length,
+                l3: assessment.traits.l3.length,
+                l4: assessment.traits.l4.length
+            };
+            
+            const total = counts.l1 + counts.l2 + counts.l3 + counts.l4;
+            
+            // CRITICAL: Any L4 traits = automatic L4 (fireable behavior overrides everything)
+            if (counts.l4 > 0) return 'L4';
+            
+            // CONCERNING: 3+ L3 traits = L3 (multiple improvement areas = needs work)
+            if (counts.l3 >= 3) return 'L3';
+            
+            // EXCEPTIONAL: 3+ L1 traits AND fewer than 3 L3s = L1 (top performer)
+            if (counts.l1 >= 3 && counts.l3 < 3) return 'L1';
+            
+            // SOLID: Otherwise = L2 (meets requirements)
+            return 'L2';
+        }
+
+        function getRatingLabel(rating) {
+            const labels = {
+                'L1': 'L1 - Exceptional',
+                'L2': 'L2 - Meets Requirements',
+                'L3': 'L3 - Needs Improvement',
+                'L4': 'L4 - Must Address Immediately'
+            };
+            return labels[rating] || rating;
+        }
+
+        function getRatingColor(rating) {
+            const colors = {
+                'L1': '#10b981',
+                'L2': '#3b82f6',
+                'L3': '#f59e0b',
+                'L4': '#ef4444'
+            };
+            return colors[rating] || '#6b7280';
+        }
+
+        // Load assessments from localStorage on page load
+        function loadAssessments() {
+            const stored = localStorage.getItem('assessments');
+            console.log('Loading from localStorage:', stored);
+            if (stored) {
+                try {
+                    assessments = JSON.parse(stored);
+                    console.log('Loaded assessments:', assessments);
+                } catch (error) {
+                    console.error('Error parsing assessments:', error);
+                    assessments = [];
+                }
+            } else {
+                assessments = [];
+            }
+        }
+
+        // Render trait checkboxes
+        function renderTraitCheckboxes() {
+            Object.keys(traits).forEach(level => {
+                const container = document.getElementById(level + 'Traits');
+                container.innerHTML = traits[level].map(trait => `
+                    <label class="trait-checkbox" data-id="${trait.id}" data-conflicts="${trait.conflicts.join(',')}">
+                        <input type="checkbox" value="${trait.id}" data-level="${level}" onchange="handleTraitChange(this)">
+                        <div class="trait-label">
+                            <strong>${trait.name}</strong>
+                            <p>${trait.desc}</p>
+                            <textarea 
+                                class="trait-note" 
+                                id="note_${trait.id}" 
+                                placeholder="Add specific example or evidence (optional)..."
+                                style="display: none;"
+                                oninput="updateTraitNote('${trait.id}', this.value)"
+                            ></textarea>
+                        </div>
+                    </label>
+                `).join('');
+            });
+        }
+
+        function handleTraitChange(checkbox) {
+            const traitId = checkbox.value;
+            const level = checkbox.dataset.level;
+            const trait = traits[level].find(t => t.id === traitId);
+            const noteField = document.getElementById(`note_${traitId}`);
+            
+            if (checkbox.checked) {
+                selectedTraits.add(traitId);
+                checkbox.parentElement.classList.add('selected');
+                
+                // Show note field
+                if (noteField) {
+                    noteField.style.display = 'block';
+                }
+                
+                // Hide conflicting traits
+                hideConflictingTraits(trait.conflicts);
+            } else {
+                selectedTraits.delete(traitId);
+                checkbox.parentElement.classList.remove('selected');
+                
+                // Hide note field and clear note
+                if (noteField) {
+                    noteField.style.display = 'none';
+                    noteField.value = '';
+                    delete traitNotes[traitId];
+                }
+                
+                // Re-evaluate what should be visible
+                updateTraitVisibility();
+            }
+            
+            updateSelectedCount();
+        }
+
+        function hideConflictingTraits(conflicts) {
+            if (!conflicts || conflicts.length === 0) return;
+            
+            // For each conflict group, hide all traits in that group except selected ones
+            Object.keys(traits).forEach(level => {
+                traits[level].forEach(trait => {
+                    const hasConflict = trait.conflicts.some(c => conflicts.includes(c));
+                    if (hasConflict && !selectedTraits.has(trait.id)) {
+                        const element = document.querySelector(`label[data-id="${trait.id}"]`);
+                        if (element) {
+                            element.classList.add('hidden');
+                        }
+                    }
+                });
+            });
+        }
+
+        function updateTraitVisibility() {
+            // First, show all traits
+            document.querySelectorAll('.trait-checkbox').forEach(el => {
+                el.classList.remove('hidden');
+            });
+            
+            // Then hide conflicts for each selected trait
+            selectedTraits.forEach(selectedId => {
+                const selectedLevel = [...Object.keys(traits)].find(level => 
+                    traits[level].some(t => t.id === selectedId)
+                );
+                const selectedTrait = traits[selectedLevel].find(t => t.id === selectedId);
+                
+                if (selectedTrait && selectedTrait.conflicts) {
+                    hideConflictingTraits(selectedTrait.conflicts);
+                }
+            });
+        }
+
+        function updateSelectedCount() {
+            const count = selectedTraits.size;
+            document.getElementById('selectedCount').textContent = 
+                count === 0 ? '0 traits selected' : 
+                count === 1 ? '1 trait selected' : 
+                `${count} traits selected`;
+        }
+
+        // Save assessment function
+        function saveAssessment() {
+            console.log('Save button clicked');
+            console.log('Selected traits:', selectedTraits);
+
+            if (selectedTraits.size === 0) {
+                alert('Please select at least one trait before saving.');
+                return;
+            }
+
+            const name = document.getElementById('employeeName').value.trim();
+            const period = document.getElementById('reviewPeriod').value.trim();
+
+            if (!name || !period) {
+                alert('Please enter employee name and review period.');
+                return;
+            }
+
+            const assessment = {
+                id: Date.now(),
+                name: name,
+                period: period,
+                notes: document.getElementById('generalNotes').value,
+                date: new Date().toLocaleDateString(),
+                traits: {
+                    l1: [],
+                    l2: [],
+                    l3: [],
+                    l4: []
+                }
+            };
+
+            console.log('Assessment object created:', assessment);
+
+            // Collect selected traits
+            selectedTraits.forEach(traitId => {
+                const level = [...Object.keys(traits)].find(l => 
+                    traits[l].some(t => t.id === traitId)
+                );
+                const trait = traits[level].find(t => t.id === traitId);
+                if (trait) {
+                    assessment.traits[level].push({
+                        id: trait.id,
+                        name: trait.name,
+                        desc: trait.desc,
+                        note: traitNotes[traitId] || '' // Include note if exists
+                    });
+                }
+            });
+
+            console.log('Assessment with traits:', assessment);
+
+            // Load current assessments from localStorage
+            loadAssessments();
+            console.log('Current assessments before push:', assessments);
+            
+            // Add new assessment
+            assessments.push(assessment);
+            console.log('All assessments after push:', assessments);
+            
+            try {
+                localStorage.setItem('assessments', JSON.stringify(assessments));
+                console.log('Saved to localStorage');
+                
+                // Verify save
+                const verification = localStorage.getItem('assessments');
+                console.log('Verification - what was actually saved:', verification);
+            } catch (error) {
+                console.error('Error saving to localStorage:', error);
+                alert('Error saving assessment: ' + error.message);
+                return;
+            }
+
+            // Clear form and update display
+            document.getElementById('employeeName').value = '';
+            document.getElementById('reviewPeriod').value = '';
+            document.getElementById('generalNotes').value = '';
+            selectedTraits.clear();
+            traitNotes = {}; // Clear all notes
+            document.querySelectorAll('.trait-checkbox').forEach(el => {
+                el.classList.remove('selected', 'hidden');
+                const checkbox = el.querySelector('input[type="checkbox"]');
+                if (checkbox) checkbox.checked = false;
+                // Hide and clear note fields
+                const noteField = el.querySelector('.trait-note');
+                if (noteField) {
+                    noteField.style.display = 'none';
+                    noteField.value = '';
+                }
+            });
+            updateSelectedCount();
+            
+            console.log('About to render assessments');
+            renderAssessments();
+            console.log('Render complete');
+
+            // Success message
+            alert('Assessment saved successfully!');
+        }
+
+        function resetForm() {
+            document.getElementById('employeeName').value = '';
+            document.getElementById('reviewPeriod').value = '';
+            document.getElementById('generalNotes').value = '';
+            selectedTraits.clear();
+            traitNotes = {}; // Clear all notes
+            document.querySelectorAll('.trait-checkbox').forEach(el => {
+                el.classList.remove('selected', 'hidden');
+                const checkbox = el.querySelector('input[type="checkbox"]');
+                if (checkbox) checkbox.checked = false;
+                // Hide and clear note fields
+                const noteField = el.querySelector('.trait-note');
+                if (noteField) {
+                    noteField.style.display = 'none';
+                    noteField.value = '';
+                }
+            });
+            updateSelectedCount();
+        }
+
+        function renderAssessments() {
+            console.log('renderAssessments called');
+            const container = document.getElementById('employeeList');
+            console.log('Container element:', container);
+            console.log('Number of assessments:', assessments.length);
+
+            if (assessments.length === 0) {
+                console.log('No assessments, showing empty state');
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                        </svg>
+                        <p>No assessments yet. Create your first assessment!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            console.log('Generating HTML for assessments');
+            const html = assessments.map((assessment, index) => {
+                console.log(`Processing assessment ${index}:`, assessment);
+                const l1Count = assessment.traits.l1.length;
+                const l2Count = assessment.traits.l2.length;
+                const l3Count = assessment.traits.l3.length;
+                const l4Count = assessment.traits.l4.length;
+
+                console.log(`Counts - L1: ${l1Count}, L2: ${l2Count}, L3: ${l3Count}, L4: ${l4Count}`);
+
+                const overallRating = calculateOverallRating(assessment);
+                const ratingColor = getRatingColor(overallRating);
+                const ratingLabel = getRatingLabel(overallRating);
+
+                return `
+                    <div class="employee-card">
+                        <div class="employee-header">
+                            <div>
+                                <div class="employee-name">${assessment.name}</div>
+                                <div class="employee-period">${assessment.period} • ${assessment.date}</div>
+                                <div class="overall-rating" style="background: ${ratingColor}">
+                                    Overall: ${ratingLabel}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="trait-summary">
+                            <div class="summary-badge l1">
+                                <span class="summary-number">${l1Count}</span>
+                                <span class="summary-label">L1 Traits</span>
+                            </div>
+                            <div class="summary-badge l2">
+                                <span class="summary-number">${l2Count}</span>
+                                <span class="summary-label">L2 Traits</span>
+                            </div>
+                            <div class="summary-badge l3">
+                                <span class="summary-number">${l3Count}</span>
+                                <span class="summary-label">L3 Traits</span>
+                            </div>
+                            <div class="summary-badge l4">
+                                <span class="summary-number">${l4Count}</span>
+                                <span class="summary-label">L4 Traits</span>
+                            </div>
+                        </div>
+
+                        <div class="action-buttons">
+                            <button class="action-btn view-btn" onclick="viewDetails(${assessment.id})">View Full Assessment</button>
+                            <button class="action-btn delete-btn" onclick="deleteAssessment(${assessment.id})">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            console.log('Setting innerHTML');
+            container.innerHTML = html;
+            console.log('innerHTML set successfully');
+        }
+
+        function viewDetails(id) {
+            const assessment = assessments.find(a => a.id === id);
+            if (!assessment) return;
+
+            const total = assessment.traits.l1.length + assessment.traits.l2.length + 
+                         assessment.traits.l3.length + assessment.traits.l4.length;
+
+            const l1Percent = total > 0 ? (assessment.traits.l1.length / total * 100).toFixed(0) : 0;
+            const l2Percent = total > 0 ? (assessment.traits.l2.length / total * 100).toFixed(0) : 0;
+            const l3Percent = total > 0 ? (assessment.traits.l3.length / total * 100).toFixed(0) : 0;
+            const l4Percent = total > 0 ? (assessment.traits.l4.length / total * 100).toFixed(0) : 0;
+
+            const overallRating = calculateOverallRating(assessment);
+            const ratingLabel = getRatingLabel(overallRating);
+            const ratingColor = getRatingColor(overallRating);
+
+            document.getElementById('modalTitle').textContent = `${assessment.name} - ${assessment.period}`;
+            
+            let bodyHTML = `
+                <div class="overall-assessment">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h4>Overall Performance Profile</h4>
+                        <div style="background: ${ratingColor}; color: white; padding: 10px 20px; border-radius: 20px; font-weight: 700; font-size: 1.1em;">
+                            ${ratingLabel}
+                        </div>
+                    </div>
+                    <div class="performance-bar">
+                        ${assessment.traits.l1.length > 0 ? `<div class="bar-segment l1" style="width: ${l1Percent}%">${l1Percent}%</div>` : ''}
+                        ${assessment.traits.l2.length > 0 ? `<div class="bar-segment l2" style="width: ${l2Percent}%">${l2Percent}%</div>` : ''}
+                        ${assessment.traits.l3.length > 0 ? `<div class="bar-segment l3" style="width: ${l3Percent}%">${l3Percent}%</div>` : ''}
+                        ${assessment.traits.l4.length > 0 ? `<div class="bar-segment l4" style="width: ${l4Percent}%">${l4Percent}%</div>` : ''}
+                    </div>
+                    <p><strong>Total Traits:</strong> ${total} identified (${assessment.traits.l1.length} L1, ${assessment.traits.l2.length} L2, ${assessment.traits.l3.length} L3, ${assessment.traits.l4.length} L4)</p>
+                    ${assessment.notes ? `<p><strong>Notes:</strong> ${assessment.notes}</p>` : ''}
+                </div>
+            `;
+
+            ['l1', 'l2', 'l3', 'l4'].forEach(level => {
+                if (assessment.traits[level].length > 0) {
+                    const levelTitles = {
+                        l1: 'L1 - Exceptional Performance',
+                        l2: 'L2 - Meets Requirements',
+                        l3: 'L3 - Needs Improvement',
+                        l4: 'L4 - Must Address Immediately'
+                    };
+
+                    bodyHTML += `
+                        <div class="trait-list ${level}">
+                            <h4>${levelTitles[level]} (${assessment.traits[level].length})</h4>
+                            ${assessment.traits[level].map(trait => `
+                                <div class="trait-item">
+                                    <div style="font-weight: 600;">${trait.name}</div>
+                                    ${trait.note ? `<div style="margin-top: 5px; padding: 8px; background: #f3f4f6; border-radius: 4px; font-size: 0.9em;"><strong>Note:</strong> ${trait.note}</div>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+            });
+
+            document.getElementById('modalBody').innerHTML = bodyHTML;
+            document.getElementById('detailModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').classList.remove('active');
+        }
+
+        function deleteAssessment(id) {
+            if (confirm('Are you sure you want to delete this assessment?')) {
+                assessments = assessments.filter(a => a.id !== id);
+                localStorage.setItem('assessments', JSON.stringify(assessments));
+                renderAssessments();
+            }
+        }
+
+        // Close modal on background click
+        document.getElementById('detailModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Initialize
+        loadAssessments();
+        renderTraitCheckboxes();
+        renderAssessments();
+    </script>
+</body>
+</html>
