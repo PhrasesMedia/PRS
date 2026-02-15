@@ -636,6 +636,7 @@
 
                     <button type="button" class="btn" onclick="saveAssessment()">Save Assessment</button>
                     <button type="button" class="btn btn-secondary" onclick="resetForm()">Clear Form</button>
+                    <button type="button" class="btn" onclick="showEscalationGuide()" style="background: #059669; margin-top: 10px;">📋 When to Escalate - Guide</button>
                 </div>
             </div>
 
@@ -1434,6 +1435,86 @@ HR Representative: _________________________ Date: _____________
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
             }
+        }
+
+        function showEscalationGuide() {
+            document.getElementById('modalTitle').textContent = 'When to Escalate - Guide';
+            document.getElementById('modalBody').innerHTML = `
+                <div style="max-width: 800px;">
+                    <div style="background: #fef2f2; padding: 20px; border-radius: 10px; border-left: 4px solid #dc2626; margin-bottom: 25px;">
+                        <h3 style="color: #dc2626; margin-bottom: 10px;">🚨 Immediate Escalation Required</h3>
+                        <p style="margin-bottom: 10px;"><strong>Escalate IMMEDIATELY if you document any of these L4 behaviors:</strong></p>
+                        <ul style="margin-left: 20px; color: #666;">
+                            <li><strong>Harassment</strong> - Sexual, racial, or discriminatory comments/behavior</li>
+                            <li><strong>Fighting/Violence</strong> - Physical threats, intimidation, or altercations</li>
+                            <li><strong>Safety Violations</strong> - Actions that endanger you or others</li>
+                            <li><strong>Theft</strong> - Stealing your work, credit, or property</li>
+                            <li><strong>Severe Toxicity</strong> - Bullying, public humiliation, hostile environment</li>
+                        </ul>
+                        <p style="margin-top: 10px; color: #991b1b; font-weight: 600;">Why immediate? These create legal liability and put you at risk.</p>
+                    </div>
+
+                    <div style="background: #fffbeb; padding: 20px; border-radius: 10px; border-left: 4px solid #f59e0b; margin-bottom: 25px;">
+                        <h3 style="color: #d97706; margin-bottom: 10px;">⚠️ Escalate After Pattern (3+ Incidents)</h3>
+                        <p style="margin-bottom: 10px;"><strong>For other L4 behaviors, escalate when you have 3+ documented incidents:</strong></p>
+                        <ul style="margin-left: 20px; color: #666;">
+                            <li><strong>Lying</strong> - 3+ times caught in dishonesty affecting your work</li>
+                            <li><strong>Insubordination</strong> - 3+ times refusing to collaborate or respect you</li>
+                            <li><strong>Toxicity/Gossip</strong> - 3+ separate incidents of spreading rumors</li>
+                            <li><strong>Chronic issues</strong> - Persistent phone usage, tardiness affecting team</li>
+                        </ul>
+                        <p style="margin-top: 10px; color: #92400e; font-weight: 600;">Why 3? Shows a pattern, not a one-time bad day. HR takes patterns seriously.</p>
+                    </div>
+
+                    <div style="background: #eff6ff; padding: 20px; border-radius: 10px; border-left: 4px solid #3b82f6; margin-bottom: 25px;">
+                        <h3 style="color: #2563eb; margin-bottom: 10px;">💼 Escalate When It Impacts Your Work</h3>
+                        <p style="margin-bottom: 10px;"><strong>Even with fewer than 3 incidents, escalate if:</strong></p>
+                        <ul style="margin-left: 20px; color: #666;">
+                            <li>You can't do your job effectively because of their behavior</li>
+                            <li>Your mental health is suffering (anxiety, dread going to work)</li>
+                            <li>They're sabotaging your projects or reputation</li>
+                            <li>You're losing opportunities because of their actions</li>
+                            <li>Other colleagues are noticing and commenting</li>
+                            <li>The behavior is escalating in severity over time</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: #f0fdf4; padding: 20px; border-radius: 10px; border-left: 4px solid #10b981; margin-bottom: 25px;">
+                        <h3 style="color: #059669; margin-bottom: 10px;">✅ How to Present Your Case</h3>
+                        <p style="margin-bottom: 10px;"><strong>When you escalate to HR/Management, bring:</strong></p>
+                        <ol style="margin-left: 20px; color: #666;">
+                            <li style="margin-bottom: 8px;"><strong>Your Documentation</strong> - Print or export your assessments showing dates, incidents, and patterns</li>
+                            <li style="margin-bottom: 8px;"><strong>Specific Impact</strong> - "I cannot complete Project X because [Name] refuses to provide data"</li>
+                            <li style="margin-bottom: 8px;"><strong>What You Want</strong> - Be clear about desired outcome (behavior stops, team change, PIP, etc.)</li>
+                            <li style="margin-bottom: 8px;"><strong>Witnesses</strong> - List anyone who saw the incidents</li>
+                        </ol>
+                        <p style="margin-top: 15px; padding: 15px; background: white; border-radius: 6px;">
+                            <strong>Tip:</strong> Email HR/manager so there's a written record. Attach your documentation. Be factual, not emotional. Focus on business impact.
+                        </p>
+                    </div>
+
+                    <div style="background: #fef2f2; padding: 20px; border-radius: 10px; border-left: 4px solid #dc2626;">
+                        <h3 style="color: #dc2626; margin-bottom: 10px;">🛡️ Red Flags - Escalate NOW</h3>
+                        <p style="margin-bottom: 10px;"><strong>Don't wait if you experience:</strong></p>
+                        <ul style="margin-left: 20px; color: #666;">
+                            <li>You're losing sleep or experiencing anxiety over this person</li>
+                            <li>You're considering quitting because of one person</li>
+                            <li>You feel unsafe (physically or psychologically)</li>
+                            <li>They're damaging your professional reputation</li>
+                            <li>Management is starting to believe their lies about you</li>
+                            <li>You've had 3+ serious incidents in one month</li>
+                        </ul>
+                        <p style="margin-top: 15px; padding: 15px; background: white; border-radius: 6px; font-weight: 600; color: #991b1b;">
+                            Remember: Your documentation gives you credibility. Use it when you need to. You deserve a respectful workplace.
+                        </p>
+                    </div>
+
+                    <div style="margin-top: 25px; text-align: center;">
+                        <button onclick="closeModal()" class="action-btn view-btn" style="background: #667eea;">Close Guide</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('detailModal').classList.add('active');
         }
 
         // Close modal on background click
